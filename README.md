@@ -12,6 +12,11 @@ since there are many representations of one change
 
 [codesandbox.io: live diff html editor](https://codesandbox.io/s/javascript-live-html-diff-editor-work-in-progress-7045p?file=/src/index.js)
 
+## use cases
+
+* feedback: allow users to edit html documents in their browser and generate patches in unidiff format (`diff -u`)
+* postprocessing: edit diff files to optimize the `<del>` and `<ins>` chunks for human-readability
+
 ## implementation
 
 we use `inputevent` and `selectionchangeevent`
