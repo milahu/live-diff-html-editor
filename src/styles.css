@@ -1,0 +1,14 @@
+body {
+  font-family: sans-serif;
+}
+
+ins {
+  background-color: rgba(0, 255, 0, 0.5);
+  text-decoration: none;
+}
+
+del {
+  background-color: rgba(255, 0, 0, 0.5);
+  text-decoration: none;
+}
+
