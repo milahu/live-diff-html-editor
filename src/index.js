@@ -48,10 +48,34 @@ document.getElementById("app").innerHTML = `
 
 `;
 
+const copyToClipboardButton = document.createElement('button');
+copyToClipboardButton.innerHTML = 'copy chardiff to clipboard';
+copyToClipboardButton.onclick = () => {
+  var copyText = document.querySelector('textarea[title="custom diff format"]');
+  copyText.select();
+  copyText.setSelectionRange(0, 99999); /* For mobile devices */
+  document.execCommand("copy");
+  copyText.setSelectionRange(0, 0);
+  // verify
+  if (copyText.value == chardiffEncoded) console.log('copy ok');
+  else console.log('copy fail');
+};
+document.getElementById("app").appendChild(copyToClipboardButton);
+
 const githubNewIssueLink = document.createElement('a');
 githubNewIssueLink.innerHTML = 'share chardiff as github issue';
 githubNewIssueLink.target = '_new'; // open in new tab
 document.getElementById("app").appendChild(githubNewIssueLink);
+
+let chardiffEncoded = '';
+
+async function updateChardiffOfEditable(editable) {
+  document.querySelector('textarea[title="editable.innerHTML"]').innerHTML = editable.innerHTML;
+  chardiffEncoded = await chardiff.encode(editable.innerHTML);
+  document.querySelector('textarea[title="custom diff format"]').innerHTML = chardiffEncoded.replace(/&/g, '&amp;');
+  chardiff.decode(chardiffEncoded); // test decode
+  githubNewIssueLink.href = `https://github.com/milahu/live-diff-html-editor/issues/new?labels=enhancement&title=${encodeURIComponent(`chardiff test ${new Date().toLocaleString('lt')}`)}&body=${encodeURIComponent('i suggest this change:\n\n```chardiff\n' + chardiffEncoded + '\n```')}`;
+}
 
 if (1) {
 
@@ -232,23 +256,13 @@ if (1) {
         if (editHistory && editHistory.length > 0) {
           const { html, cursor } = editHistory.pop();
           editable.innerHTML = html;
-          // TODO refactor
-          document.querySelector('textarea[title="editable.innerHTML"]').innerHTML = editable.innerHTML;
-          const chardiffEncoded = await chardiff.encode(editable.innerHTML);
-          document.querySelector('textarea[title="custom diff format"]').innerHTML = chardiffEncoded.replace(/&/g, '&amp;');
-          chardiff.decode(chardiffEncoded); // test decode
-          githubNewIssueLink.href = `https://github.com/milahu/live-diff-html-editor/issues/new?labels=enhancement&title=${encodeURIComponent(`chardiff test ${new Date().toLocaleString('lt')}`)}&body=${encodeURIComponent('i suggest this change:\n\n```chardiff\n' + chardiffEncoded + '\n```')}`;
+          await updateChardiffOfEditable(editable);
           Cursor.setCurrentCursorPosition(cursor, editable);
           editable.focus();
         }
         else {
           editable.innerHTML = editable.getAttribute('data-start-html');
-          // TODO refactor
-          document.querySelector('textarea[title="editable.innerHTML"]').innerHTML = editable.innerHTML;
-          const chardiffEncoded = await chardiff.encode(editable.innerHTML);
-          document.querySelector('textarea[title="custom diff format"]').innerHTML = chardiffEncoded.replace(/&/g, '&amp;');
-          chardiff.decode(chardiffEncoded); // test decode
-          githubNewIssueLink.href = `https://github.com/milahu/live-diff-html-editor/issues/new?labels=enhancement&title=${encodeURIComponent(`chardiff test ${new Date().toLocaleString('lt')}`)}&body=${encodeURIComponent('i suggest this change:\n\n```chardiff\n' + chardiffEncoded + '\n```')}`;
+          await updateChardiffOfEditable(editable);
         }
         return;
       }
@@ -296,13 +310,7 @@ if (1) {
         }
         console.log('inputEvent: append to old <ins> tag')
         editHistoryMap.get(editable).push({ html: editable.innerHTML, cursor });
-        // TODO refactor
-        document.querySelector('textarea[title="editable.innerHTML"]').innerHTML = editable.innerHTML;
-        const chardiffEncoded = await chardiff.encode(editable.innerHTML);
-        document.querySelector('textarea[title="custom diff format"]').innerHTML = chardiffEncoded.replace(/&/g, '&amp;');
-        chardiff.decode(chardiffEncoded); // test decode
-        githubNewIssueLink.href = `https://github.com/milahu/live-diff-html-editor/issues/new?labels=enhancement&title=${encodeURIComponent(`chardiff test ${new Date().toLocaleString('lt')}`)}&body=${encodeURIComponent('i suggest this change:\n\n```chardiff\n' + chardiffEncoded + '\n```')}`;
-
+        await updateChardiffOfEditable(editable);
         return;
       }
 
@@ -334,12 +342,7 @@ if (1) {
         // TODO fix cursor position
 
         editHistoryMap.get(editable).push({ html: editable.innerHTML, cursor });
-        // TODO refactor
-        document.querySelector('textarea[title="editable.innerHTML"]').innerHTML = editable.innerHTML;
-        const chardiffEncoded = await chardiff.encode(editable.innerHTML);
-        document.querySelector('textarea[title="custom diff format"]').innerHTML = chardiffEncoded.replace(/&/g, '&amp;');
-        chardiff.decode(chardiffEncoded); // test decode
-        githubNewIssueLink.href = `https://github.com/milahu/live-diff-html-editor/issues/new?labels=enhancement&title=${encodeURIComponent(`chardiff test ${new Date().toLocaleString('lt')}`)}&body=${encodeURIComponent('i suggest this change:\n\n```chardiff\n' + chardiffEncoded + '\n```')}`;
+        await updateChardiffOfEditable(editable);
         Cursor.setCurrentCursorPosition(cursor, editable);
         editable.focus();
 
@@ -688,12 +691,7 @@ if (1) {
       // TODO set cursor position to after <del>...</del>
 
       editHistoryMap.get(editable).push({ html: editable.innerHTML, cursor });
-      // TODO refactor
-      document.querySelector('textarea[title="editable.innerHTML"]').innerHTML = editable.innerHTML;
-      const chardiffEncoded = await chardiff.encode(editable.innerHTML);
-      document.querySelector('textarea[title="custom diff format"]').innerHTML = chardiffEncoded.replace(/&/g, '&amp;');
-      chardiff.decode(chardiffEncoded); // test decode
-      githubNewIssueLink.href = `https://github.com/milahu/live-diff-html-editor/issues/new?labels=enhancement&title=${encodeURIComponent(`chardiff test ${new Date().toLocaleString('lt')}`)}&body=${encodeURIComponent('i suggest this change:\n\n```chardiff\n' + chardiffEncoded + '\n```')}`;
+      await updateChardiffOfEditable(editable);
       Cursor.setCurrentCursorPosition(cursor, editable);
       editable.focus();
 
