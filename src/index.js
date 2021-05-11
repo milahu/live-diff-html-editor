@@ -674,6 +674,9 @@ if (1) {
         }
         console.log('inputEvent: append to old <ins> tag')
         editHistoryMap.get(editable).push({ html: editable.innerHTML, cursor });
+        document.querySelector('textarea[title="editable.innerHTML"]').innerHTML = editable.innerHTML;
+        document.querySelector('textarea[title="custom diff format"]').innerHTML = (await customDiffEncode(editable.innerHTML)).replace(/&/g, '&amp;');
+
         return;
       }
 
