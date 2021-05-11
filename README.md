@@ -22,6 +22,9 @@ since there are many representations of one change
 we use `inputevent` and `selectionchangeevent`
 to build an exact live diff view of the user input
 
+we use the `contenteditable="true"` attribute
+to make html contents editable
+
 ## status
 
 there are many edge-cases to solve ...
@@ -44,6 +47,52 @@ there are many edge-cases to solve ...
 this could be interesting for the
 [pijul](https://pijul.org/posts/2019-04-23-pijul-0.12/#refactoring-of-diff)
 VCS, where exact diffs are desired
+
+### annotation
+
+* [hypothesis](https://github.com/hypothesis/h) annotation platform
+    * [self-hosted hypothesis](https://web.hypothes.is/blog/mdpi-integrates-hypothesis/), cos all hosters are only publishers (who will censor content they dont like) (also see gab's [dissenter](https://dissenter.com/) app)
+* https://www.w3.org/TR/annotation-protocol/
+* https://github.com/recogito/recogito-js 60 stars
+* https://github.com/zhan-huang/text-annotator 6 stars
+* https://github.com/k-son/simple-text-annotations 1 star
+* old projects
+    * https://github.com/openannotation/annotator/ 2500 stars
+    * https://github.com/FUB-HCC/neonion 70 stars
+    * https://github.com/szabyg/annotate.js 60 stars
+    * https://github.com/SuLab/YPet 30 stars
+    * https://brat.nlplab.org/ year 2012
+    * https://github.com/jamiemcg/moodle-collaborative-annotation plugin for moodle, 4 stars
+
+### github as data store
+
+* https://github.com/issue-db/issue-db 50 stars, year 2018
+* https://github.com/DavidBruant/github-as-a-database 10 stars, year 2018
+
+### collaboration
+
+these tools focus on low-latency collaboration (real-time collaboration),
+similar to text chats or
+[agile software development](https://en.wikipedia.org/wiki/Agile_software_development)
+
+* https://geovation.github.io/canvas-shared-editor "This blog describes 3 potential open-source tools (TogetherJS, Firepad and ShareDB)"
+* https://firepad.io/ by google
+* https://togetherjs.com/ by mozilla
+* https://prosemirror.net/
+* https://convergence.io/
+* https://github.com/share/sharedb backend database
+* https://ckeditor.com/ckeditor-5/features/ commercial
+* https://github.com/collaborativejs/collaborative-js
+
+### rich text editors
+
+* [tinyMCE core](https://www.tiny.cloud/)
+* [firepad](https://firepad.io/examples/#richtext-YCQs8ZL5VM)
+* https://prosemirror.net/ with [change tracker](https://prosemirror.net/examples/track/)
+
+### data labeling for machine learning
+
+* https://github.com/heartexlabs/awesome-data-labeling
 
 ## license
 
