@@ -8,6 +8,22 @@ which are not intended by the user.
 the diff format is always ambiguous,
 since there are many representations of one change
 
+## status
+
+deprecated
+
+this was just a proof of the "live diff html editor" concept
+
+probably the best candidate
+to implement a FOSS "track changes" editor is the
+[prosemirror](https://github.com/ProseMirror/prosemirror) rich text editor,
+with support for live collaboration via [y-prosemirror](https://github.com/yjs/y-prosemirror)
+and [yts](https://github.com/yjs/yjs)
+
+ckeditor5 has a commercial
+[track changes](https://ckeditor.com/docs/ckeditor5/latest/features/collaboration/track-changes/track-changes.html)
+but we want a FOSS solution
+
 ## live demo
 
 [codesandbox.io: live diff html editor](https://codesandbox.io/s/javascript-live-html-diff-editor-work-in-progress-7045p?file=/src/index.js)
@@ -88,16 +104,37 @@ similar to text chats or
 * https://firepad.io/ by google
 * https://togetherjs.com/ by mozilla
 * https://prosemirror.net/
+    * https://stackoverflow.com/questions/58887843/how-do-i-perform-track-changes-in-the-quill-editor-just-like-google-docs
 * https://convergence.io/
 * https://github.com/share/sharedb backend database
 * https://ckeditor.com/ckeditor-5/features/ commercial
 * https://github.com/collaborativejs/collaborative-js
+* backends: https://www.tag1consulting.com/blog/evaluating-real-time-collaborative-editing-solutions-top-fortune-50-company
+    * https://github.com/yjs/yjs with bindings for editors:
+        * https://github.com/ProseMirror/prosemirror rich text editor
+        * https://github.com/ianstormtaylor/slate rich text editor, built on React (boo!)
+        * https://github.com/quilljs/quill rich text editor
+            * https://stackoverflow.com/questions/58887843/how-do-i-perform-track-changes-in-the-quill-editor-just-like-google-docs
+            * https://stackoverflow.com/questions/58887843/how-do-i-perform-track-changes-in-the-quill-editor-just-like-google-docs/65288202#65288202
+        * https://codemirror.net/ source code editor
+        * https://microsoft.github.io/monaco-editor/ source code editor
+* Open source collaborative text editors @ https://news.ycombinator.com/item?id=19845776
 
 ### rich text editors
 
-* [tinyMCE core](https://www.tiny.cloud/)
+* [slate](https://github.com/ianstormtaylor/slate)
+* [trix](https://github.com/basecamp/trix) 200 KB
+* [etherpad-lite](https://github.com/ether/etherpad-lite)
+* [ckeditor5](https://github.com/ckeditor/ckeditor5) 500 KB
+    * commercial [track changes](https://ckeditor.com/docs/ckeditor5/latest/features/collaboration/track-changes/track-changes.html) feature
+* [tinyMCE core](https://www.tiny.cloud/) (old)
 * [firepad](https://firepad.io/examples/#richtext-YCQs8ZL5VM)
 * https://prosemirror.net/ with [change tracker](https://prosemirror.net/examples/track/)
+* [pell](https://github.com/jaredreich/pell) 4 KB (smallest editor) (old)
+* [quill](https://github.com/quilljs/quill) built for compatibility and extensibility (old)
+* [Trumbowyg](https://github.com/Alex-D/Trumbowyg) requires JQuery
+
+more: https://github.com/JefMari/awesome-wysiwyg
 
 ### data labeling for machine learning
 
