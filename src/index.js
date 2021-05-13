@@ -10,6 +10,8 @@
 
 // TODO handle replace operation: select old text, insert/paste new text -> <del>old text</del><ins>new text</ins>
 // FIXME delete across html nodes, e.g. text <b>bold bold</b> text -> delete 'ext <b>bol'. handle forward-select vs backward-select
+// FIXME handle rightclick + cut/paste
+// TODO integrate this with some lightweight richtext editor? tinymce-core? see README.md
 
 import "./styles.css";
 //import * as htmldiff from "./htmldiff.js";
@@ -27,18 +29,21 @@ const debugTextEditor = true;
 const liveDiffEditorClassNameDel = 'live-diff-editor-node-del';
 const liveDiffEditorClassNameIns = 'live-diff-editor-node-ins';
 
+/*
+\\backslashes\\ and $dollars$ are welcome here,
+also \rcarriage returns\r are accepted.
+unicode: äöüß´\`§€
+&amp;ampersand test&amp;
+*/
+
 document.getElementById("app").innerHTML = `
 
 <div>
 
 <div class="editable">
   hello world
-  <b>please just</b>
-  edit me
-  \\backslashes\\ and $dollars$ are welcome here,
-  also \rcarriage returns\r are accepted.
-  unicode: äöüß´\`§€
-  &amp;ampersand test&amp;
+  <b>please <i>just edit</i> me again</b>
+  and again
 </div>
 
 <textarea readonly cols="40" rows="20" title="editable.innerHTML"></textarea>
@@ -70,6 +75,7 @@ document.getElementById("app").appendChild(githubNewIssueLink);
 let chardiffEncoded = '';
 
 async function updateChardiffOfEditable(editable) {
+  return; // DEBUG
   document.querySelector('textarea[title="editable.innerHTML"]').innerHTML = editable.innerHTML;
   chardiffEncoded = await chardiff.encode(editable.innerHTML);
   document.querySelector('textarea[title="custom diff format"]').innerHTML = chardiffEncoded.replace(/&/g, '&amp;');
@@ -507,7 +513,7 @@ if (1) {
             }
           }
           else {
-            // FIXME delete range an start of html tag
+            // FIXME delete range at start of html tag
             // for example: text <b>[delete range] more bold text</b> text
             // actual result: <del> is inserted at wrong position
             //var cutCondition = 'cutb1'; // old
@@ -588,6 +594,7 @@ if (1) {
         console.log(`cs: anchorOffset ${cs.anchorOffset}, baseOffset ${cs.baseOffset}, extentOffset ${cs.extentOffset}, focusOffset ${cs.focusOffset}`);
         console.log(`cut: a1 ${cuta1}, a2 ${cuta2}, b1 ${cutb1}, b2 ${cutb2}`);
 
+        // FIXME delete right-to-left selections across node boundaries
 
         if (1) {
           // <del> end of baseNode
@@ -607,59 +614,132 @@ if (1) {
           ws.baseNode.replaceWith(nodesFragment);
         }
 
-
+        // FIXME loop all nodes between baseNode and extentNode
+        // TODO limit depth. only wrap parent nodes in <del>
+        // https://stackoverflow.com/questions/35475961/how-to-iterate-over-every-node-in-a-selected-range-in-javascript
         if (1) {
-          // <del> html nodes by adding class
-          console.log(`mark: ws.parentNodeClone.childNodes`);
-          //console.log('ws.baseNodeClone', ws.baseNodeClone);
-          var pos = 0;
-          var startFound = false;
-          //console.log('ws.parentNodeClone.childNodes', ws.parentNodeClone.childNodes);
-          for (const fooChild of ws.parentNodeClone.childNodes) {
-            //console.log('ws.parentNodeClone.childNodes', ws.parentNodeClone.childNodes);
-            //console.log('fooChild', fooChild);
-            console.log(`fooChild ${fooChild.outerHTML || JSON.stringify(fooChild.data)}`);
-            if (!startFound) {
-              if (fooChild == ws.baseNodeClone) { // we need pointer-identity -> find baseNode in parentNodeClone
-                console.log('fooChild found start');
-                startFound = true;
+          // <del> html nodes
+
+
+          // https://stackoverflow.com/a/46056649/10440128
+          var _iterator = document.createNodeIterator(
+            ws.parentNodeClone,
+            NodeFilter.SHOW_ALL, // pre-filter
+            /*
+            {
+                // custom filter
+                acceptNode: function (node) {
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            }
+            */
+          );
+          var _nodes = [];
+          // seek to baseNode
+          while (_iterator.nextNode()) {
+            if (_iterator.referenceNode != ws.baseNodeClone) continue;
+            ///_nodes.push(_iterator.referenceNode); // add first node // exclude baseNode, already done
+            break;
+          }
+          while (_iterator.nextNode()) {
+            if (_iterator.referenceNode == ws.extentNodeClone) break; // exclude extentNode, do later
+            _nodes.push(_iterator.referenceNode); // add other nodes
+          }
+
+          var nodesFragment = document.createDocumentFragment();
+          var fooChildIdx = -1;
+          for (const fooChild of _nodes) {
+            fooChildIdx++;
+            //console.log(`fooChild ${fooChildIdx}`, fooChild)
+            console.log(`fooChild ${fooChildIdx}: ${fooChild.outerHTML || JSON.stringify(fooChild.data)}`);
+            if (fooChild.nodeType == 3) {
+              // text node
+              var e = document.createElement('del');
+              e.innerHTML = fooChild.data;
+              nodesFragment.appendChild(e);
+            } else {
+              if (fooChild.contains(ws.extentNodeClone)) {
+                // <del> part of node
+                console.log('TODO <del> part of node')
               }
               else {
-                console.log('fooChild seek to start ...');
-                continue;
+                // <del> full node
+                // html node
+                // use <del>...</del> and <ins>...</ins> to wrap html nodes
+                // -> avoid messing with css classes
+                //console.log(`fooChild append ${fooChildClone.outerHTML || JSON.stringify(fooChild.data)}`);
+                // we must clone fooChild
+                // otherwise fooChild is removed from childNodes, and the for-loop will skip nodes
+                const fooChildClone = fooChild.cloneNode(true);
+                var e = document.createElement('del');
+                e.appendChild(fooChildClone);
+                nodesFragment.appendChild(e);
               }
             }
-            if (fooChild == ws.extentNodeClone) {
-              console.log(`fooChild found end ${fooChild.outerHTML || JSON.stringify(fooChild.data)}`);
-              break;
+          }
+          // TODO insert nodesFragment ... before extentNode? after baseNode?
+          // https://www.javascripttutorial.net/javascript-dom/javascript-insertafter/
+          //function insertAfter(newNode, existingNode) {
+          //  existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
+          //}
+          ws.extentNode.parentNode.insertBefore(nodesFragment, ws.extentNode);
+
+          if (0) {
+            console.log(`mark: ws.parentNodeClone.childNodes`);
+            //console.log('ws.baseNodeClone', ws.baseNodeClone);
+            var pos = 0;
+            var startFound = false;
+            //console.log('ws.parentNodeClone.childNodes', ws.parentNodeClone.childNodes);
+            for (const fooChild of ws.parentNodeClone.childNodes) {
+              //console.log('ws.parentNodeClone.childNodes', ws.parentNodeClone.childNodes);
+              //console.log('fooChild', fooChild);
+              console.log(`fooChild type ${fooChild.nodeType} ${fooChild.outerHTML || JSON.stringify(fooChild.data)}`);
+              if (!startFound) {
+                if (fooChild == ws.baseNodeClone) { // we need pointer-identity -> find baseNode in parentNodeClone
+                  console.log('fooChild found start');
+                  startFound = true;
+                }
+                else {
+                  console.log('fooChild seek to start ...');
+                  continue;
+                }
+              }
+              if (fooChild == ws.extentNodeClone) {
+                console.log(`fooChild found end ${fooChild.outerHTML || JSON.stringify(fooChild.data)}`);
+                break;
+              }
+              // we must clone fooChild
+              // otherwise fooChild is removed from childNodes, and the for-loop will skip nodes
+              const fooChildClone = fooChild.cloneNode(true);
+              if (fooChildClone.nodeType != 3) {
+                // no text node
+                ////////fooChildClone.classList.add(liveDiffEditorClassNameDel);
+                // not needed, <del> style is inherited: <del>text <b>bold</b> text</del>
+                // -> just use <del>...</del> and <ins>...</ins> to wrap whole nodes? -> avoid messing with css classes
+              }
+              console.log(`fooChild append ${fooChildClone.outerHTML || JSON.stringify(fooChild.data)}`);
+              var nodesFragment = document.createDocumentFragment();
+              var e = document.createElement('del');
+              e.appendChild(fooChildClone);
+              nodesFragment.appendChild(e);
+              
+              /*
+              var childData = (fooChild.nodeType == 3) ? fooChild.textContent : fooChild.innerHTML;
+              const end = pos + childData.length;
+              if (end > cuta2 && cuta2 > pos) {
+                // cut last child
+                e.appendChild(document.createTextNode(childData.slice(cuta2 - pos)));
+                console.log(`cut ${(cuta2 - pos)}-end`, fooChild)
+                break;
+              }
+              else {
+                e.appendChild(fooChild);
+                console.log('append', fooChild)
+              }
+              pos = end;
+              if (pos > cuta2) break;
+              */
             }
-            // we must clone fooChild
-            // otherwise fooChild is removed from childNodes, and the for-loop will skip nodes
-            const fooChildClone = fooChild.cloneNode(true);
-            if (fooChildClone.nodeType != 3) {
-              // no text node
-              ////////fooChildClone.classList.add(liveDiffEditorClassNameDel);
-              // not needed, <del> style is inherited: <del>text <b>bold</b> text</del>
-              // -> just use <del>...</del> and <ins>...</ins> to wrap whole nodes? -> avoid messing with css classes
-            }
-            console.log(`fooChild append ${fooChildClone.outerHTML || JSON.stringify(fooChild.data)}`);
-            e.appendChild(fooChildClone);
-            /*
-            var childData = (fooChild.nodeType == 3) ? fooChild.textContent : fooChild.innerHTML;
-            const end = pos + childData.length;
-            if (end > cuta2 && cuta2 > pos) {
-              // cut last child
-              e.appendChild(document.createTextNode(childData.slice(cuta2 - pos)));
-              console.log(`cut ${(cuta2 - pos)}-end`, fooChild)
-              break;
-            }
-            else {
-              e.appendChild(fooChild);
-              console.log('append', fooChild)
-            }
-            pos = end;
-            if (pos > cuta2) break;
-            */
           }
         }
 
