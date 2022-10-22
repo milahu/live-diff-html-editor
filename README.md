@@ -14,11 +14,24 @@ deprecated
 
 this was just a proof of the "live diff html editor" concept
 
+### prosemirror track changes plugin
+
 probably the best candidate
 to implement a FOSS "track changes" editor is the
 [prosemirror](https://github.com/ProseMirror/prosemirror) rich text editor,
 with support for live collaboration via [y-prosemirror](https://github.com/yjs/y-prosemirror)
 and [yts](https://github.com/yjs/yjs)
+
+* https://github.com/milahu/prosemirror-track-changes-demo based on [fiduswriter](https://github.com/fiduswriter/fiduswriter/issues/1142)
+
+similar but different: track changes as commits
+
+* https://prosemirror.net/examples/track/
+  * https://github.com/ProseMirror/website/blob/master/example/track/index.js
+* https://github.com/newsdev/prosemirror-change-tracking-prototype
+* https://github.com/TeemuKoivisto/prosemirror-track-changes-example
+
+### other track changes plugins
 
 ckeditor5 has a commercial
 [track changes](https://ckeditor.com/docs/ckeditor5/latest/features/collaboration/track-changes/track-changes.html)
